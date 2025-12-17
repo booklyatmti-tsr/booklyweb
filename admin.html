@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
+        /* All your existing styles - unchanged */
         :root {
             --primary:#6366f1; --primary-dark:#4f46e5; --success:#10b981; --danger:#ef4444;
             --gray:#94a3b8; --light:#f8fafc; --dark:#1e293b; --glass:rgba(255,255,255,0.15);
@@ -182,7 +183,6 @@
         <p>Beautiful • Powerful • Yours</p>
     </div>
     <div class="content">
-        <!-- Login -->
         <div id="login-area">
             <h2 style="margin-bottom:20px;color:var(--dark)">Welcome Back</h2>
             <p style="color:#666;margin-bottom:30px">Enter admin password to access dashboard</p>
@@ -192,7 +192,6 @@
                 <button class="btn" style="border:2px solid #e2e8f0;background:transparent;color:#475569" onclick="window.close()">Close</button>
             </div>
         </div>
-        <!-- Dashboard -->
         <div id="admin-area" class="hidden">
             <div class="dashboard-header">
                 <div>
@@ -212,7 +211,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, set, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCLI2yT6B2d83GgmUdE-uS-kYFVIRn6guQ",
@@ -269,12 +268,15 @@
                 orders.push(child.val());
             });
             orders.reverse();
-            if (document.querySelector('.nav-buttons .btn-primary').classList.contains('active') || orders.length > 0) showOrders();
+            showOrders();
         });
 
         onValue(stockRef, (snapshot) => {
             stock = snapshot.val() || {};
-            if (document.querySelector('.nav-buttons .btn-success').classList.contains('active')) showStock();
+            // Refresh stock view if currently open
+            if (document.getElementById('admin-content').innerHTML.includes('Manage Stock')) {
+                showStock();
+            }
         });
 
         onValue(deliveredRef, (snapshot) => {
@@ -360,13 +362,23 @@
         document.getElementById('admin-content').innerHTML = html;
     }
 
+    // FIXED: Correct path for stock update
     window.updateStock = function(id) {
-        const val = parseInt(document.getElementById(`stock-${id}`).value);
-        if (isNaN(val) || val < 0) return alert('Invalid value');
-        update(stockRef, { [`${id}/stock`]: val });
-        const msg = document.getElementById(`msg-${id}`);
-        msg.innerHTML = 'Updated successfully!';
-        setTimeout(() => msg.innerHTML = '', 2500);
+        const input = document.getElementById(`stock-${id}`);
+        const val = parseInt(input.value);
+        if (isNaN(val) || val < 0) {
+            alert('Invalid value');
+            input.value = stock[id]?.stock || 200;
+            return;
+        }
+        // Correct update path: /stock/{id}/stock
+        update(ref(db, `stock/${id}`), { stock: val }).then(() => {
+            const msg = document.getElementById(`msg-${id}`);
+            msg.innerHTML = 'Updated successfully!';
+            setTimeout(() => msg.innerHTML = '', 2500);
+        }).catch(err => {
+            alert('Error updating stock: ' + err.message);
+        });
     };
 
     document.getElementById('admin-pass').addEventListener('keyup', e => {

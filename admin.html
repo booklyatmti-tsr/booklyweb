@@ -250,7 +250,7 @@
             document.getElementById('login-area').classList.add('hidden');
             document.getElementById('admin-area').classList.remove('hidden');
             loadData();
-            showOrders();  // Default view: Orders
+            showOrders(); // Default view
         } else {
             alert('Incorrect password!');
         }
@@ -270,17 +270,17 @@
                 orders.push(child.val());
             });
             orders.reverse();
-            showOrders();  // Always refresh orders when data changes
+            showOrders();
         });
 
         onValue(stockRef, (snapshot) => {
             stock = snapshot.val() || {};
-            showStock();  // Refresh stock whenever it changes (even if on orders page)
+            showStock(); // Always refresh stock when changed (even if on orders page)
         });
 
         onValue(deliveredRef, (snapshot) => {
             delivered = snapshot.val() || [];
-            showOrders();  // Refresh delivered status
+            showOrders();
         });
     }
 
@@ -361,18 +361,23 @@
         document.getElementById('admin-content').innerHTML = html;
     };
 
+    // FINAL FIXED STOCK UPDATE
     window.updateStock = function(id) {
-        const val = parseInt(document.getElementById(`stock-${id}`).value);
+        const input = document.getElementById(`stock-${id}`);
+        const val = parseInt(input.value);
         if (isNaN(val) || val < 0) {
             alert('Invalid value');
             return;
         }
-        update(stockRef, { [`${id}.stock`]: val }).then(() => {
+        // Correct path: update nested stock field
+        update(stockRef, { [`${id}/stock`]: val }).then(() => {
             const msg = document.getElementById(`msg-${id}`);
             msg.innerHTML = 'Updated successfully!';
-            setTimeout(() => msg.innerHTML = '', 2500);
+            setTimeout(() => msg.innerHTML = '', 3000);
+            // Force refresh the stock view to show new value immediately
+            showStock();
         }).catch(err => {
-            alert('Error: ' + err.message);
+            alert('Error updating stock: ' + err.message);
         });
     };
 

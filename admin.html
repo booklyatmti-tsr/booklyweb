@@ -8,170 +8,253 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         :root {
-            --primary:#6366f1; --primary-dark:#4f46e5; --success:#10b981; --danger:#ef4444;
-            --gray:#94a3b8; --light:#f8fafc; --dark:#1e293b; --glass:rgba(255,255,255,0.15);
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gray: #94a3b8;
+            --dark: #1e293b;
+            --glass: rgba(255,255,255,0.15);
+            --card-bg: rgba(255,255,255,0.95);
         }
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{
-            font-family:'Poppins',sans-serif;
-            background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height:100vh;
-            padding:16px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            overflow-x:hidden;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-x: hidden;
         }
-        .card{
-            background:rgba(255,255,255,0.95);
-            backdrop-filter:blur(20px);
-            border-radius:24px;
-            box-shadow:0 25px 60px rgba(0,0,0,0.2);
-            width:100%;
-            max-width:1200px;
-            margin:0 auto;
-            overflow:hidden;
-            animation:fadeIn 0.8s ease-out;
-            border:1px solid rgba(255,255,255,0.3);
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 1200px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: fadeInUp 0.9s ease-out;
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        @keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        .header-title{
-            text-align:center;
-            padding:32px 20px;
-            background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-            color:white;
-            position:relative;
-            overflow:hidden;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .header-title::before{
-            content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
-            background:radial-gradient(circle,rgba(255,255,255,0.2) 0%,transparent 70%);
-            animation:shine 8s infinite;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes shine{0%,100%{transform:translate(0,0)}50%{transform:translate(50%,50%)}}
-        .header-title h1{font-size:2.8rem;font-weight:800;margin:0;letter-spacing:-1px}
-        .header-title p{font-size:1.1rem;opacity:0.95;margin-top:8px}
-        .content{padding:32px}
-        .hidden{display:none !important}
-        .btn{
-            padding:14px 24px;
-            border:none;
-            border-radius:16px;
-            font-weight:700;
-            cursor:pointer;
-            transition:all .4s ease;
-            font-size:1rem;
-            box-shadow:0 8px 25px rgba(0,0,0,0.15);
-            position:relative;
-            overflow:hidden;
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(99,102,241,0.3); }
+            50% { box-shadow: 0 0 35px rgba(99,102,241,0.6); }
+            100% { box-shadow: 0 0 15px rgba(99,102,241,0.3); }
         }
-        .btn::before{
-            content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
-            transition:all .6s;
+        @keyframes shine {
+            0% { transform: translate(0,0); }
+            50% { transform: translate(50%,50%); }
+            100% { transform: translate(0,0); }
         }
-        .btn:hover::before{left:100%}
-        .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white}
-        .btn-success{background:linear-gradient(135deg,var(--success),#059669);color:white}
-        .btn-danger{background:#ef4444;color:white}
-        .btn-delivered{background:var(--success);color:white;cursor:default;opacity:0.9}
-        .btn-delivered:hover{transform:none;box-shadow:none}
-        #login-area{text-align:center;padding:50px 20px;animation:slideUp 0.6s ease-out}
-        #login-area input{
-            width:100%;max-width:420px;margin:20px auto;display:block;
-            padding:18px 20px;border-radius:16px;border:2px solid #e2e8f0;
-            font-size:1.2rem;transition:all .3s;
+        .header-title {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 50px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
-        #login-area input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 6px rgba(99,102,241,0.2)}
-        .btn-group{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:30px}
-        .dashboard-header{
-            display:flex;justify-content:space-between;align-items:center;
-            flex-wrap:wrap;gap:16px;margin-bottom:30px;
-            padding:20px;background:var(--glass);border-radius:20px;
-            backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);
-            animation:slideUp 0.7s ease-out;
-        }
-        .nav-buttons{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:30px 0}
-        .nav-buttons .btn{flex:1;max-width:300px}
-        .orders-container{
-            max-height:70vh;overflow-y:auto;padding:10px;border-radius:16px;
-            background:rgba(248,250,252,0.6);backdrop-filter:blur(10px);
-        }
-        .order-card{
-            background:white;border-radius:20px;padding:22px;margin:16px 0;
-            box-shadow:0 10px 30px rgba(0,0,0,0.1);transition:all .4s;
-            animation:slideUp 0.5s ease-out;
-            border-left:5px solid var(--primary);
-            position:relative;
-        }
-        .order-card.delivered{
-            opacity:0.88;
-            border-left:5px solid var(--success);
-            background:#f8fff8;
-        }
-        .order-card.delivered h4{color:var(--success)}
-        .order-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(99,102,241,0.2)}
-        .order-card h4{
-            color:var(--primary);font-size:1.5rem;margin:0 0 12px;
-            display:flex;align-items:center;gap:10px;
-        }
-        .student-info{
-            font-size:1rem;color:#555;margin:10px 0;
-            display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-        }
-        .items-list{
-            background:#f8fafc;padding:16px;border-radius:16px;margin:14px 0;
-            border:1px dashed #e2e8f0;
-        }
-        .item-row{
-            display:flex;justify-content:space-between;padding:8px 0;
-            font-weight:500;
-        }
-        .total-line{
-            text-align:right;font-size:1.6rem;font-weight:900;
-            color:var(--primary);margin-top:16px;
-            display:flex;align-items:center;justify-content:flex-end;gap:10px;
-        }
-        .date{font-size:0.9rem;color:var(--gray);margin-top:8px;text-align:right}
-        .delivery-btn{
+        .header-title::before {
+            content: '';
             position: absolute;
-            top: 16px;
-            right: 16px;
-            z-index: 10;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+            animation: shine 12s linear infinite;
         }
-        .delivery-btn .btn{
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            min-width: auto;
+        .header-title h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            animation: slideIn 0.9s ease-out;
+        }
+        .header-title p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-top: 10px;
+        }
+        .content { padding: 40px; }
+        .hidden { display: none !important; }
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(0,0,0,0.25); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .btn-success { background: linear-gradient(135deg, var(--success), #059669); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-delivered { background: var(--success); color: white; opacity: 0.9; cursor: default; }
+        #login-area {
+            text-align: center;
+            animation: slideIn 0.8s ease-out;
+        }
+        #login-area h2 {
+            font-size: 2.2rem;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+        #login-area input {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            margin: 30px auto;
+            border-radius: 20px;
+            border: 3px solid #e2e8f0;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+        }
+        #login-area input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 8px rgba(99,102,241,0.25);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 24px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-buttons .btn {
+            flex: 1;
+            max-width: 320px;
+            animation: slideIn 0.7s ease-out;
+            font-size: 1.2rem;
+        }
+        .orders-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(248,250,252,0.7);
+            backdrop-filter: blur(12px);
+        }
+        .order-card {
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            margin: 20px 0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            transition: all 0.4s ease;
+            animation: slideIn 0.6s ease-out;
+            border-left: 7px solid var(--primary);
+            position: relative;
+        }
+        .order-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 30px 60px rgba(99,102,241,0.3);
+            animation: pulseGlow 2s infinite;
+        }
+        .order-card.delivered {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+        }
+        .order-card h4 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        .order-card .student-info {
+            font-size: 1.1rem;
+            color: #555;
+            margin: 12px 0;
+        }
+        .delivery-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .delivery-btn .btn {
+            padding: 14px 28px;
+            font-size: 1rem;
             border-radius: 50px;
         }
-        .stock-grid{
-            display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-            gap:24px;margin-top:20px;
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
         }
-        .stock-item{
-            background:white;border-radius:20px;padding:24px;text-align:center;
-            box-shadow:0 12px 35px rgba(0,0,0,0.1);
-            transition:all .4s;animation:slideUp 0.6s ease-out;
-            border:1px solid rgba(99,102,241,0.1);
+        .stock-item {
+            background: white;
+            padding: 32px;
+            border-radius: 28px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            transition: all 0.4s ease;
+            animation: slideIn 0.8s ease-out;
         }
-        .stock-item:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(99,102,241,0.15)}
-        .stock-item h4{font-size:1.3rem;margin:0 0 10px;display:flex;align-items:center;justify-content:center;gap:10px}
-        .price-tag{color:var(--gray);font-size:1rem;margin:10px 0}
-        .stock-input input{
-            width:100%;padding:16px;border-radius:16px;border:2px solid #e2e8f0;
-            font-size:1.4rem;text-align:center;font-weight:700;color:var(--primary);
-            transition:all .3s;
+        .stock-item:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 60px rgba(99,102,241,0.25);
         }
-        .stock-input input:focus{border-color:var(--primary);box-shadow:0 0 0 6px rgba(99,102,241,0.2)}
-        .msg{color:var(--success);font-weight:700;margin-top:12px;font-size:1.1rem}
-        @media(max-width:768px){
-            .header-title h1{font-size:2.2rem}
-            .nav-buttons{flex-direction:column;align-items:stretch}
-            .btn{width:100%}
-            .stock-grid{grid-template-columns:1fr}
-            .delivery-btn .btn{font-size:0.9rem;padding:10px 16px}
+        .stock-item h4 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+        .stock-item p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin: 15px 0;
+        }
+        .stock-input input {
+            width: 100%;
+            padding: 18px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-radius: 20px;
+            border: 3px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        .stock-input input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 8px rgba(99,102,241,0.25);
+        }
+        .msg {
+            color: var(--success);
+            font-weight: 700;
+            margin-top: 16px;
+            font-size: 1.2rem;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @media (max-width: 768px) {
+            .header-title h1 { font-size: 2.6rem; }
+            .header-title p { font-size: 1.1rem; }
+            .nav-buttons { flex-direction: column; }
+            .btn { width: 100%; }
+            .stock-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -179,214 +262,155 @@
 <div class="card">
     <div class="header-title">
         <h1>Bookly Admin</h1>
-        <p>Beautiful • Powerful • Yours</p>
+        <p>Dashboard</p>
     </div>
     <div class="content">
+        <!-- LOGIN -->
         <div id="login-area">
-            <h2 style="margin-bottom:20px;color:var(--dark)">Welcome Back</h2>
-            <p style="color:#666;margin-bottom:30px">Enter admin password to access dashboard</p>
-            <input type="password" id="admin-pass" placeholder="••••••••" autocomplete="off">
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="adminLogin()">Login</button>
-                <button class="btn" style="border:2px solid #e2e8f0;background:transparent;color:#475569" onclick="window.close()">Close</button>
-            </div>
+            <h2>Admin Login</h2>
+            <input type="password" id="admin-pass" placeholder="Password">
+            <button class="btn btn-primary" onclick="adminLogin()">Login</button>
         </div>
+        <!-- ADMIN -->
         <div id="admin-area" class="hidden">
-            <div class="dashboard-header">
-                <div>
-                    <h2>Dashboard</h2>
-                    <p style="color:#64748b">Everything is running smoothly</p>
-                </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h2>Dashboard</h2>
                 <button class="btn btn-danger" onclick="logout()">Logout</button>
             </div>
             <div class="nav-buttons">
-                <button class="btn btn-primary" onclick="showOrders()">View Orders</button>
+                <button class="btn btn-primary" onclick="showOrders()">Orders</button>
                 <button class="btn btn-success" onclick="showStock()">Manage Stock</button>
             </div>
             <div id="admin-content"></div>
         </div>
     </div>
 </div>
-
+<!-- ================= FIREBASE ================= -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCLI2yT6B2d83GgmUdE-uS-kYFVIRn6guQ",
-      authDomain: "booklyformti-289b3.firebaseapp.com",
-      databaseURL: "https://booklyformti-289b3-default-rtdb.firebaseio.com",
-      projectId: "booklyformti-289b3",
-      storageBucket: "booklyformti-289b3.firebasestorage.app",
-      messagingSenderId: "805510539338",
-      appId: "1:805510539338:web:cb246d1347f3af9bd79eb3"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const ordersRef = ref(db, 'orders');
-    const stockRef = ref(db, 'stock');
-    const deliveredRef = ref(db, 'delivered');
-
-    const PRODUCTS = [
-        { id: 'graphed-rough', name: 'Graphed Rough Record', price: 30 },
-        { id: 'graphed-fair', name: 'Graphed Fair Record', price: 80 },
-        { id: 'non-graphed-rough', name: 'Non-Graphed Rough', price: 30 },
-        { id: 'non-graphed-fair', name: 'Non-Graphed Fair', price: 85 },
-        { id: 'big-fair', name: 'Big Fair Record', price: 90 },
-        { id: 'workshop-record', name: 'Workshop Record', price: 120 }
-    ];
-
-    const PASSWORD = 'bookly2025';
-
-    let orders = [];
-    let stock = {};
-    let delivered = [];
-
-    function adminLogin() {
-        if (document.getElementById('admin-pass').value === PASSWORD) {
-            document.getElementById('login-area').classList.add('hidden');
-            document.getElementById('admin-area').classList.remove('hidden');
-            loadData();
-        } else {
-            alert('Incorrect password!');
-        }
-    }
-
-    function logout() {
-        document.getElementById('admin-pass').value = '';
-        document.getElementById('admin-area').classList.add('hidden');
-        document.getElementById('login-area').classList.remove('hidden');
-        document.getElementById('admin-content').innerHTML = '';
-    }
-
-    function loadData() {
-        onValue(ordersRef, (snapshot) => {
-            orders = [];
-            snapshot.forEach(child => {
-                orders.push(child.val());
-            });
-            orders.reverse();
-            showOrders();
-        });
-
-        onValue(stockRef, (snapshot) => {
-            stock = snapshot.val() || {};
-            if (document.getElementById('admin-content').innerHTML.includes('Manage Stock')) {
-                showStock();
-            }
-        });
-
-        onValue(deliveredRef, (snapshot) => {
-            delivered = snapshot.val() || [];
-            showOrders();
-        });
-    }
-
-    window.markAsDelivered = function(bookingId) {
-        if (!delivered.includes(bookingId)) {
-            delivered.push(bookingId);
-            set(deliveredRef, delivered);
-        }
-    };
-
-    function showOrders() {
-        let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
-            All Orders (${orders.length})
-            <span style="font-size:0.9rem;color:var(--success);margin-left:10px">
-                (${delivered.length} delivered)
-            </span>
-        </h3>`;
-        if (orders.length === 0) {
-            html += `<p style="text-align:center;color:#888;padding:80px 0;font-size:1.3rem">
-                No orders yet. Waiting for the first one!
-            </p>`;
-        } else {
-            html += `<div class="orders-container">`;
-            orders.forEach(o => {
-                const isDelivered = delivered.includes(o.bookingId);
-                let items = '';
-                for (const id in o.items) {
-                    const p = PRODUCTS.find(x => x.id === id) || {name: id};
-                    items += `<div class="item-row"><span>${p.name}</span><strong>× ${o.items[id]}</strong></div>`;
-                }
-                html += `
-                <div class="order-card ${isDelivered ? 'delivered' : ''}">
-                    <div class="delivery-btn">
-                        ${isDelivered
-                            ? `<button class="btn btn-delivered"><i class="fas fa-check-double"></i> Delivered</button>`
-                            : `<button class="btn btn-success" onclick="markAsDelivered('${o.bookingId}')">
-                                 <i class="fas fa-truck"></i> Mark Delivered
-                               </button>`
-                        }
-                    </div>
-                    <h4>
-                        ${o.bookingId}
-                        ${isDelivered ? '<i class="fas fa-check-circle" style="color:var(--success)"></i>' : ''}
-                    </h4>
-                    <div class="student-info">
-                        <strong>${o.name}</strong> • ${o.reg} • ${o.dept}, ${o.sem}
-                    </div>
-                    <div class="items-list">${items}</div>
-                    <div class="total-line">₹${o.total}</div>
-                    <div class="date">${o.date || 'Just now'}</div>
-                </div>`;
-            });
-            html += `</div>`;
-        }
-        document.getElementById('admin-content').innerHTML = html;
-    }
-
-    function showStock() {
-        let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
-            Manage Stock
-        </h3><div class="stock-grid">`;
-        PRODUCTS.forEach(p => {
-            const curr = stock[p.id]?.stock || 200;
-            html += `
-            <div class="stock-item">
-                <h4>${p.name}</h4>
-                <div class="price-tag">₹${p.price} each • Available: ${curr}</div>
-                <div class="stock-input">
-                    <input type="number" min="0" value="${curr}" id="stock-${p.id}">
-                </div>
-                <button class="btn btn-success" onclick="updateStock('${p.id}')">
-                    <i class="fas fa-save"></i> Update Stock
-                </button>
-                <div id="msg-${p.id}" class="msg"></div>
-            </div>`;
-        });
-        html += `</div>`;
-        document.getElementById('admin-content').innerHTML = html;
-    }
-
-    // 100% WORKING STOCK UPDATE
-    window.updateStock = function(id) {
-        const input = document.getElementById(`stock-${id}`);
-        const val = parseInt(input.value);
-
-        if (isNaN(val) || val < 0) {
-            alert('Enter a valid number 0 or more');
-            input.value = stock[id]?.stock || 200;
-            return;
-        }
-
-        // This line is the key — correct path using string concatenation
-        update(stockRef, { [id + "/stock"]: val });
-
-        const msg = document.getElementById(`msg-${id}`);
-        msg.innerHTML = 'Stock updated! Now everyone sees it';
-        setTimeout(() => msg.innerHTML = '', 3000);
-
-        // Update local stock variable and refresh view
-        if (!stock[id]) stock[id] = {};
-        stock[id].stock = val;
-        input.value = val;
-    };
-
-    document.getElementById('admin-pass').addEventListener('keyup', e => {
-        if (e.key === 'Enter') adminLogin();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import {
+    getDatabase,
+    ref,
+    onValue,
+    update,
+    set,
+    child
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+/* ---------- FIREBASE CONFIG ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCLI2yT6B2d83GgmUdE-uS-kYFVIRn6guQ",
+  authDomain: "booklyformti-289b3.firebaseapp.com",
+  databaseURL: "https://booklyformti-289b3-default-rtdb.firebaseio.com",
+  projectId: "booklyformti-289b3",
+  storageBucket: "booklyformti-289b3.firebasestorage.app",
+  messagingSenderId: "805510539338",
+  appId: "1:805510539338:web:cb246d1347f3af9bd79eb3"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+/* ---------- REFERENCES ---------- */
+const ordersRef = ref(db, "orders");
+const stockRef = ref(db, "stock");
+const deliveredRef = ref(db, "delivered");
+/* ---------- DATA ---------- */
+const PASSWORD = "bookly2025";
+const PRODUCTS = [
+  { id: "graphed-rough", name: "Graphed Rough", price: 30 },
+  { id: "graphed-fair", name: "Graphed Fair", price: 80 },
+  { id: "non-graphed-rough", name: "Non Graphed Rough", price: 30 },
+  { id: "non-graphed-fair", name: "Non Graphed Fair", price: 85 },
+  { id: "big-fair", name: "Big Fair", price: 90 },
+  { id: "workshop-record", name: "Workshop Record", price: 120 }
+];
+let orders = [];
+let stock = {};
+let delivered = [];
+/* ---------- LOGIN ---------- */
+window.adminLogin = () => {
+    if (document.getElementById("admin-pass").value === PASSWORD) {
+        document.getElementById("login-area").classList.add("hidden");
+        document.getElementById("admin-area").classList.remove("hidden");
+        loadData();
+    } else alert("Wrong password");
+};
+window.logout = () => {
+    document.getElementById("admin-area").classList.add("hidden");
+    document.getElementById("login-area").classList.remove("hidden");
+};
+/* ---------- LOAD DATA ---------- */
+function loadData() {
+    onValue(ordersRef, snap => {
+        orders = [];
+        snap.forEach(c => orders.push(c.val()));
+        orders.reverse();
+        showOrders();
     });
+    onValue(stockRef, snap => {
+        stock = snap.val() || {};
+    });
+    onValue(deliveredRef, snap => {
+        delivered = snap.val() || [];
+    });
+}
+/* ---------- ORDERS ---------- */
+window.markAsDelivered = id => {
+    if (!delivered.includes(id)) {
+        delivered.push(id);
+        set(deliveredRef, delivered);
+    }
+};
+window.showOrders = () => {
+    let html = `<h3>Orders (${orders.length})</h3><div class="orders-container">`;
+    orders.forEach(o => {
+        const isDel = delivered.includes(o.bookingId);
+        let items = "";
+        for (let i in o.items) items += `<div>${i} × ${o.items[i]}</div>`;
+        html += `
+        <div class="order-card ${isDel ? "delivered" : ""}">
+            <div class="delivery-btn">
+                ${isDel ?
+                    `<button class="btn btn-delivered">Delivered</button>` :
+                    `<button class="btn btn-success" onclick="markAsDelivered('${o.bookingId}')">Deliver</button>`
+                }
+            </div>
+            <h4>${o.bookingId}</h4>
+            <div>${o.name} • ${o.reg}</div>
+            ${items}
+            <strong>₹${o.total}</strong>
+        </div>`;
+    });
+    html += "</div>";
+    document.getElementById("admin-content").innerHTML = html;
+};
+/* ---------- STOCK ---------- */
+window.showStock = () => {
+    let html = `<h3>Manage Stock</h3><div class="stock-grid">`;
+    PRODUCTS.forEach(p => {
+        const curr = stock[p.id]?.stock ?? 200;
+        html += `
+        <div class="stock-item">
+            <h4>${p.name}</h4>
+            <p>₹${p.price} | Available: ${curr}</p>
+            <div class="stock-input">
+                <input type="number" id="stock-${p.id}" value="${curr}" min="0">
+            </div>
+            <button class="btn btn-success" onclick="updateStock('${p.id}')">Update</button>
+            <div id="msg-${p.id}" class="msg"></div>
+        </div>`;
+    });
+    html += "</div>";
+    document.getElementById("admin-content").innerHTML = html;
+};
+window.updateStock = id => {
+    const input = document.getElementById(`stock-${id}`);
+    const val = parseInt(input.value);
+    if (isNaN(val) || val < 0) {
+        alert("Invalid stock value");
+        return;
+    }
+    update(child(stockRef, id), { stock: val });
+    document.getElementById(`msg-${id}`).innerText = "Stock updated!";
+};
 </script>
 </body>
 </html>

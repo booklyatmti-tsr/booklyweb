@@ -244,6 +244,7 @@
     let orders = [];
     let stock = {};
     let delivered = [];
+    let currentView = ''; // Track current view: '' or 'stock'
 
     function adminLogin() {
         if (document.getElementById('admin-pass').value === PASSWORD) {
@@ -260,6 +261,7 @@
         document.getElementById('admin-area').classList.add('hidden');
         document.getElementById('login-area').classList.remove('hidden');
         document.getElementById('admin-content').innerHTML = '';
+        currentView = '';
     }
 
     function loadData() {
@@ -269,19 +271,17 @@
                 orders.push(child.val());
             });
             orders.reverse();
-            showOrders();
+            if (currentView !== 'stock') showOrders();
         });
 
         onValue(stockRef, (snapshot) => {
             stock = snapshot.val() || {};
-            if (document.getElementById('admin-content').innerHTML.includes('Manage Stock')) {
-                showStock();
-            }
+            if (currentView === 'stock') showStock();
         });
 
         onValue(deliveredRef, (snapshot) => {
             delivered = snapshot.val() || [];
-            showOrders();
+            if (currentView !== 'stock') showOrders();
         });
     }
 
@@ -293,6 +293,7 @@
     };
 
     function showOrders() {
+        currentView = '';
         let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
             All Orders (${orders.length})
             <span style="font-size:0.9rem;color:var(--success);margin-left:10px">
@@ -339,7 +340,8 @@
         document.getElementById('admin-content').innerHTML = html;
     }
 
-    function showStock() {
+    window.showStock = function() {
+        currentView = 'stock';
         let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
             Manage Stock
         </h3><div class="stock-grid">`;
@@ -360,9 +362,8 @@
         });
         html += `</div>`;
         document.getElementById('admin-content').innerHTML = html;
-    }
+    };
 
-    // FIXED STOCK UPDATE - correct dotted path
     window.updateStock = function(id) {
         const val = parseInt(document.getElementById(`stock-${id}`).value);
         if (isNaN(val) || val < 0) {
@@ -373,8 +374,6 @@
             const msg = document.getElementById(`msg-${id}`);
             msg.innerHTML = 'Updated successfully!';
             setTimeout(() => msg.innerHTML = '', 2500);
-            // Refresh stock view to show updated value immediately
-            showStock();
         }).catch(err => {
             alert('Error: ' + err.message);
         });

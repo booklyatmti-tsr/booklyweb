@@ -126,7 +126,7 @@
         }
         .item-row{
             display:flex;justify-content:space-between;padding:8px 0;
-            font-weight:500;animation:fadeIn 0.6s ease-out;
+            font-weight:500;
         }
         .total-line{
             text-align:right;font-size:1.6rem;font-weight:900;
@@ -209,7 +209,27 @@
         </div>
     </div>
 </div>
-<script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update, set, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLI2yT6B2d83GgmUdE-uS-kYFVIRn6guQ",
+      authDomain: "booklyformti-289b3.firebaseapp.com",
+      databaseURL: "https://booklyformti-289b3-default-rtdb.firebaseio.com",
+      projectId: "booklyformti-289b3",
+      storageBucket: "booklyformti-289b3.firebasestorage.app",
+      messagingSenderId: "805510539338",
+      appId: "1:805510539338:web:cb246d1347f3af9bd79eb3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const ordersRef = ref(db, 'orders');
+    const stockRef = ref(db, 'stock');
+    const deliveredRef = ref(db, 'delivered');
+
     const PRODUCTS = [
         { id: 'graphed-rough', name: 'Graphed Rough Record', price: 30 },
         { id: 'graphed-fair', name: 'Graphed Fair Record', price: 80 },
@@ -218,29 +238,20 @@
         { id: 'big-fair', name: 'Big Fair Record', price: 90 },
         { id: 'workshop-record', name: 'Workshop Record', price: 120 }
     ];
+
     const PASSWORD = 'bookly2025';
 
-    function getDeliveredIds() {
-        return JSON.parse(localStorage.getItem('bookly_delivered') || '[]');
-    }
-
-    function markAsDelivered(bookingId) {
-        let delivered = getDeliveredIds();
-        if (!delivered.includes(bookingId)) {
-            delivered.push(bookingId);
-            localStorage.setItem('bookly_delivered', JSON.stringify(delivered));
-        }
-        showOrders();
-    }
+    let orders = [];
+    let stock = {};
+    let delivered = [];
 
     function adminLogin() {
         if (document.getElementById('admin-pass').value === PASSWORD) {
             document.getElementById('login-area').classList.add('hidden');
             document.getElementById('admin-area').classList.remove('hidden');
-            showOrders();
+            loadData();
         } else {
             alert('Incorrect password!');
-            document.getElementById('admin-pass').focus();
         }
     }
 
@@ -251,26 +262,39 @@
         document.getElementById('admin-content').innerHTML = '';
     }
 
-    function getOrders() { 
-        return JSON.parse(localStorage.getItem('bookly_orders') || '[]'); 
+    function loadData() {
+        onValue(ordersRef, (snapshot) => {
+            orders = [];
+            snapshot.forEach(child => {
+                orders.push(child.val());
+            });
+            orders.reverse();
+            if (document.querySelector('.nav-buttons .btn-primary').classList.contains('active') || orders.length > 0) showOrders();
+        });
+
+        onValue(stockRef, (snapshot) => {
+            stock = snapshot.val() || {};
+            if (document.querySelector('.nav-buttons .btn-success').classList.contains('active')) showStock();
+        });
+
+        onValue(deliveredRef, (snapshot) => {
+            delivered = snapshot.val() || [];
+            showOrders();
+        });
     }
 
-    function getStock() {
-        let stock = JSON.parse(localStorage.getItem('bookly_stock') || '{}');
-        if (Object.keys(stock).length === 0) {
-            PRODUCTS.forEach(p => stock[p.id] = { stock: 200 });
-            localStorage.setItem('bookly_stock', JSON.stringify(stock));
+    window.markAsDelivered = function(bookingId) {
+        if (!delivered.includes(bookingId)) {
+            delivered.push(bookingId);
+            set(deliveredRef, delivered);
         }
-        return stock;
-    }
+    };
 
     function showOrders() {
-        const orders = getOrders().reverse();
-        const deliveredIds = getDeliveredIds();
         let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
             All Orders (${orders.length})
             <span style="font-size:0.9rem;color:var(--success);margin-left:10px">
-                (${deliveredIds.length} delivered)
+                (${delivered.length} delivered)
             </span>
         </h3>`;
         if (orders.length === 0) {
@@ -280,7 +304,7 @@
         } else {
             html += `<div class="orders-container">`;
             orders.forEach(o => {
-                const isDelivered = deliveredIds.includes(o.bookingId);
+                const isDelivered = delivered.includes(o.bookingId);
                 let items = '';
                 for (const id in o.items) {
                     const p = PRODUCTS.find(x => x.id === id) || {name: id};
@@ -314,7 +338,6 @@
     }
 
     function showStock() {
-        const stock = getStock();
         let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
             Manage Stock
         </h3><div class="stock-grid">`;
@@ -337,17 +360,14 @@
         document.getElementById('admin-content').innerHTML = html;
     }
 
-    function updateStock(id) {
+    window.updateStock = function(id) {
         const val = parseInt(document.getElementById(`stock-${id}`).value);
         if (isNaN(val) || val < 0) return alert('Invalid value');
-        const s = getStock();
-        s[id] = s[id] || {};
-        s[id].stock = val;
-        localStorage.setItem('bookly_stock', JSON.stringify(s));
+        update(stockRef, { [`${id}/stock`]: val });
         const msg = document.getElementById(`msg-${id}`);
         msg.innerHTML = 'Updated successfully!';
         setTimeout(() => msg.innerHTML = '', 2500);
-    }
+    };
 
     document.getElementById('admin-pass').addEventListener('keyup', e => {
         if (e.key === 'Enter') adminLogin();

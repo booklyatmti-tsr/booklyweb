@@ -293,9 +293,9 @@ import {
     ref,
     onValue,
     update,
-    set,
-    child
+    set
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
 /* ---------- FIREBASE CONFIG ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCLI2yT6B2d83GgmUdE-uS-kYFVIRn6guQ",
@@ -343,13 +343,17 @@ function loadData() {
         orders = [];
         snap.forEach(c => orders.push(c.val()));
         orders.reverse();
-        showOrders();
+        showOrders();  // Refresh orders every time new data comes
     });
     onValue(stockRef, snap => {
         stock = snap.val() || {};
+        if (document.getElementById('admin-content').innerHTML.includes('Manage Stock')) {
+            showStock();
+        }
     });
     onValue(deliveredRef, snap => {
         delivered = snap.val() || [];
+        showOrders();  // Refresh to update delivered buttons
     });
 }
 /* ---------- ORDERS ---------- */
@@ -360,47 +364,72 @@ window.markAsDelivered = id => {
     }
 };
 window.showOrders = () => {
-    let html = `<h3>Orders (${orders.length})</h3><div class="orders-container">`;
-    orders.forEach(o => {
-        const isDel = delivered.includes(o.bookingId);
-        let items = "";
-        for (let i in o.items) items += `<div>${i} × ${o.items[i]}</div>`;
-        html += `
-        <div class="order-card ${isDel ? "delivered" : ""}">
-            <div class="delivery-btn">
-                ${isDel ?
-                    `<button class="btn btn-delivered">Delivered</button>` :
-                    `<button class="btn btn-success" onclick="markAsDelivered('${o.bookingId}')">Deliver</button>`
-                }
-            </div>
-            <h4>${o.bookingId}</h4>
-            <div>${o.name} • ${o.reg}</div>
-            ${items}
-            <strong>₹${o.total}</strong>
-        </div>`;
-    });
-    html += "</div>";
+    let html = `<h3 style="text-align:center;margin:30px 0;font-size:2rem;color:var(--dark)">
+        All Orders (${orders.length})
+        <span style="font-size:1rem;color:var(--success);margin-left:15px">
+            (${delivered.length} delivered)
+        </span>
+    </h3>`;
+    if (orders.length === 0) {
+        html += `<p style="text-align:center;color:#888;padding:100px 0;font-size:1.4rem">
+            No orders yet. Waiting for the first one! 🚀
+        </p>`;
+    } else {
+        html += `<div class="orders-container">`;
+        orders.forEach(o => {
+            const isDel = delivered.includes(o.bookingId);
+            let items = "";
+            for (let i in o.items) {
+                const p = PRODUCTS.find(x => x.id === i) || {name: i};
+                items += `<div class="item-row"><span>${p.name}</span><strong>× ${o.items[i]}</strong></div>`;
+            }
+            html += `
+            <div class="order-card ${isDel ? "delivered" : ""}">
+                <div class="delivery-btn">
+                    ${isDel ?
+                        `<button class="btn btn-delivered"><i class="fas fa-check-double"></i> Delivered</button>` :
+                        `<button class="btn btn-success" onclick="markAsDelivered('${o.bookingId}')">
+                             <i class="fas fa-truck"></i> Mark Delivered
+                         </button>`
+                    }
+                </div>
+                <h4>${o.bookingId}</h4>
+                <div class="student-info">
+                    <strong>${o.name}</strong> • ${o.reg} • ${o.dept}, ${o.sem}
+                </div>
+                <div class="items-list">${items}</div>
+                <div class="total-line"><i class="fas fa-rupee-sign"></i> ${o.total}</div>
+                <div class="date">${o.date || 'Just now'}</div>
+            </div>`;
+        });
+        html += "</div>";
+    }
     document.getElementById("admin-content").innerHTML = html;
 };
 /* ---------- STOCK ---------- */
 window.showStock = () => {
-    let html = `<h3>Manage Stock</h3><div class="stock-grid">`;
+    let html = `<h3 style="text-align:center;margin:30px 0;font-size:2rem;color:var(--dark)">
+        Manage Stock
+    </h3><div class="stock-grid">`;
     PRODUCTS.forEach(p => {
         const curr = stock[p.id]?.stock ?? 200;
         html += `
         <div class="stock-item">
             <h4>${p.name}</h4>
-            <p>₹${p.price} | Available: ${curr}</p>
+            <p>₹${p.price} each • Available: <strong>${curr}</strong></p>
             <div class="stock-input">
                 <input type="number" id="stock-${p.id}" value="${curr}" min="0">
             </div>
-            <button class="btn btn-success" onclick="updateStock('${p.id}')">Update</button>
+            <button class="btn btn-success" onclick="updateStock('${p.id}')">
+                <i class="fas fa-save"></i> Update Stock
+            </button>
             <div id="msg-${p.id}" class="msg"></div>
         </div>`;
     });
     html += "</div>";
     document.getElementById("admin-content").innerHTML = html;
 };
+/* ---------- FIXED STOCK UPDATE ---------- */
 window.updateStock = id => {
     const input = document.getElementById(`stock-${id}`);
     const val = parseInt(input.value);
@@ -408,8 +437,13 @@ window.updateStock = id => {
         alert("Invalid stock value");
         return;
     }
-    update(child(stockRef, id), { stock: val });
-    document.getElementById(`msg-${id}`).innerText = "Stock updated!";
+    // Correct way using dotted path on main stockRef
+    update(stockRef, { [`${id}.stock`]: val }).then(() => {
+        document.getElementById(`msg-${id}`).innerText = "Stock updated successfully!";
+        setTimeout(() => document.getElementById(`msg-${id}`).innerText = "", 3000);
+    }).catch(err => {
+        alert("Error updating stock: " + err.message);
+    });
 };
 </script>
 </body>

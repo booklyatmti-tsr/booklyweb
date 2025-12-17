@@ -362,13 +362,21 @@
         document.getElementById('admin-content').innerHTML = html;
     }
 
+    // FIXED STOCK UPDATE - correct dotted path
     window.updateStock = function(id) {
         const val = parseInt(document.getElementById(`stock-${id}`).value);
-        if (isNaN(val) || val < 0) return alert('Invalid value');
-        update(stockRef, { [`${id}/stock`]: val }).then(() => {
+        if (isNaN(val) || val < 0) {
+            alert('Invalid value');
+            return;
+        }
+        update(stockRef, { [`${id}.stock`]: val }).then(() => {
             const msg = document.getElementById(`msg-${id}`);
             msg.innerHTML = 'Updated successfully!';
             setTimeout(() => msg.innerHTML = '', 2500);
+            // Refresh stock view to show updated value immediately
+            showStock();
+        }).catch(err => {
+            alert('Error: ' + err.message);
         });
     };
 

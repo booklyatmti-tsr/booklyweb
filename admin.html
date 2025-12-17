@@ -244,13 +244,13 @@
     let orders = [];
     let stock = {};
     let delivered = [];
-    let currentView = ''; // Track current view: '' or 'stock'
 
     function adminLogin() {
         if (document.getElementById('admin-pass').value === PASSWORD) {
             document.getElementById('login-area').classList.add('hidden');
             document.getElementById('admin-area').classList.remove('hidden');
             loadData();
+            showOrders();  // Default view: Orders
         } else {
             alert('Incorrect password!');
         }
@@ -261,7 +261,6 @@
         document.getElementById('admin-area').classList.add('hidden');
         document.getElementById('login-area').classList.remove('hidden');
         document.getElementById('admin-content').innerHTML = '';
-        currentView = '';
     }
 
     function loadData() {
@@ -271,17 +270,17 @@
                 orders.push(child.val());
             });
             orders.reverse();
-            if (currentView !== 'stock') showOrders();
+            showOrders();  // Always refresh orders when data changes
         });
 
         onValue(stockRef, (snapshot) => {
             stock = snapshot.val() || {};
-            if (currentView === 'stock') showStock();
+            showStock();  // Refresh stock whenever it changes (even if on orders page)
         });
 
         onValue(deliveredRef, (snapshot) => {
             delivered = snapshot.val() || [];
-            if (currentView !== 'stock') showOrders();
+            showOrders();  // Refresh delivered status
         });
     }
 
@@ -292,8 +291,7 @@
         }
     };
 
-    function showOrders() {
-        currentView = '';
+    window.showOrders = function() {
         let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
             All Orders (${orders.length})
             <span style="font-size:0.9rem;color:var(--success);margin-left:10px">
@@ -338,10 +336,9 @@
             html += `</div>`;
         }
         document.getElementById('admin-content').innerHTML = html;
-    }
+    };
 
     window.showStock = function() {
-        currentView = 'stock';
         let html = `<h3 style="text-align:center;margin:20px 0;color:var(--dark);font-size:1.8rem">
             Manage Stock
         </h3><div class="stock-grid">`;

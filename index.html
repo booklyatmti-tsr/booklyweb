@@ -187,7 +187,25 @@
         <div class="print-total" id="print-total"></div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCLI2yT6B2d83GgmUdE-uS-kYFVIRn6guQ",
+          authDomain: "booklyformti-289b3.firebaseapp.com",
+          databaseURL: "https://booklyformti-289b3-default-rtdb.firebaseio.com",
+          projectId: "booklyformti-289b3",
+          storageBucket: "booklyformti-289b3.firebasestorage.app",
+          messagingSenderId: "805510539338",
+          appId: "1:805510539338:web:cb246d1347f3af9bd79eb3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const ordersRef = ref(db, 'orders');
+        const stockRef = ref(db, 'stock');
+
         const products = [
             { id: 'graphed-rough', name: 'Graphed Rough Record', price: 30, icon: 'fas fa-th' },
             { id: 'graphed-fair', name: 'Graphed Fair Record', price: 80, icon: 'fas fa-th-large' },
@@ -199,12 +217,17 @@
 
         let cart = {};
         let currentOrder = null;
-        let stock = JSON.parse(localStorage.getItem('bookly_stock')) || {};
+        let stock = {};
 
-        if (Object.keys(stock).length === 0) {
-            products.forEach(p => stock[p.id] = { stock: 200 });
-            localStorage.setItem('bookly_stock', JSON.stringify(stock));
-        }
+        // Load and listen to stock from Firebase
+        onValue(stockRef, (snapshot) => {
+            stock = snapshot.val() || {};
+            if (Object.keys(stock).length === 0) {
+                products.forEach(p => stock[p.id] = { stock: 200 });
+                set(stockRef, stock);
+            }
+            renderProducts();
+        });
 
         function renderProducts() {
             const grid = document.getElementById('products-grid');
@@ -227,8 +250,8 @@
             }).join('');
         }
 
-        function updateQty(id, change) {
-            const max = stock[id].stock;
+        window.updateQty = function(id, change) {  // Made global for onclick
+            const max = stock[id]?.stock || 0;
             cart[id] = (cart[id] || 0) + change;
             if (cart[id] < 0) cart[id] = 0;
             if (cart[id] > max) {
@@ -238,7 +261,7 @@
             if (cart[id] === 0) delete cart[id];
             renderProducts();
             updateCart();
-        }
+        };
 
         function updateCart() {
             let total = 0, count = 0;
@@ -252,13 +275,13 @@
             document.getElementById('checkout-btn').disabled = count === 0;
         }
 
-        function proceedToCheckout() {
+        window.proceedToCheckout = function() {
             if (Object.keys(cart).length === 0) return;
             document.getElementById('shopping-section').classList.add('hidden');
             document.getElementById('checkout-section').classList.remove('hidden');
-        }
+        };
 
-        function placeOrder() {
+        window.placeOrder = function() {
             const name = document.getElementById('student-name').value.trim();
             const reg = document.getElementById('register-number').value.trim();
             const dept = document.getElementById('department').value.trim();
@@ -269,20 +292,32 @@
             let total = 0;
             let itemHtml = "";
             let snapshot = {};
+            let stockUpdates = {};
 
             Object.keys(cart).forEach(id => {
                 const p = products.find(pr => pr.id === id);
                 total += cart[id] * p.price;
                 itemHtml += `<p><strong>${p.name}</strong> × ${cart[id]} = ₹${cart[id] * p.price}</p>`;
-                stock[id].stock -= cart[id];
                 snapshot[id] = cart[id];
+                if (stock[id]) stockUpdates[`${id}/stock`] = stock[id].stock - cart[id];
             });
 
-            localStorage.setItem('bookly_stock', JSON.stringify(stock));
+            // Save order
+            push(ordersRef, {
+                bookingId,
+                name,
+                reg,
+                dept,
+                sem,
+                items: snapshot,
+                total,
+                date: new Date().toLocaleString()
+            });
 
-            const orders = JSON.parse(localStorage.getItem('bookly_orders') || '[]');
-            orders.push({ bookingId, name, reg, dept, sem, items: snapshot, total, date: new Date().toLocaleString() });
-            localStorage.setItem('bookly_orders', JSON.stringify(orders));
+            // Update stock
+            if (Object.keys(stockUpdates).length > 0) {
+                update(stockRef, stockUpdates);
+            }
 
             currentOrder = { bookingId, name, reg, dept, sem, items: snapshot, total };
 
@@ -303,9 +338,9 @@
             cart = {};
             renderProducts();
             updateCart();
-        }
+        };
 
-        function generatePDF() {
+        window.generatePDF = function() {
             if (!currentOrder) return;
 
             document.getElementById('print-booking-id').textContent = currentOrder.bookingId;
@@ -323,9 +358,9 @@
             document.getElementById('print-total').textContent = `Total: ₹${currentOrder.total}`;
 
             window.print();
-        }
+        };
 
-        function newOrderFlow() {
+        window.newOrderFlow = function() {
             document.getElementById('receipt-section').classList.add('hidden');
             document.getElementById('shopping-section').classList.remove('hidden');
             document.getElementById('student-name').value = '';
@@ -336,7 +371,7 @@
             currentOrder = null;
             renderProducts();
             updateCart();
-        }
+        };
 
         renderProducts();
         updateCart();
